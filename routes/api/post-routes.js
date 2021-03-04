@@ -1,5 +1,7 @@
 const router = require('express').Router();
-const { Post, User } = require('../../models');
+const { Post, User, Vote } = require('../../models');
+// Sequelize database connection
+const sequelize = require('../../config/connection');
 
 // GET api/posts/ -- get all posts
 router.get('/', (req, res) => {
@@ -31,20 +33,29 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
     Post.findOne({
         where: {
-            // specify the post id parameter in the query
             id: req.params.id
         },
-        // Query configuration, as with the get all posts route
-        attributes: ['id', 'post_url', 'title', 'created_at'],
+        attributes: [
+            'id',
+            'post_url',
+            'title',
+            'created_at',
+            [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+        ],
         include: [
             {
-                model: User,
-                attributes: ['username']
+                model: Post,
+                attributes: ['id', 'title', 'post_url', 'created_at']
+            },
+            {
+                model: Post,
+                attributes: ['title'],
+                through: Vote,
+                as: 'voted_posts'
             }
         ]
     })
         .then(dbPostData => {
-            // if no post by that id exists, return an error
             if (!dbPostData) {
                 res.status(404).json({ message: 'No post found with this id' });
                 return;
@@ -52,7 +63,6 @@ router.get('/:id', (req, res) => {
             res.json(dbPostData);
         })
         .catch(err => {
-            // if a server error occured, return an error
             console.log(err);
             res.status(500).json(err);
         });
@@ -72,6 +82,17 @@ router.post('/', (req, res) => {
             res.status(500).json(err);
         });
 });
+
+// PUT api/posts/upvote -- upvote a post (this route must be above the update route, otherwise express.js will treat upvote as an id)
+router.put('/upvote', (req, res) => {
+    // custom static method created in models/Post.js
+    Post.upvote(req.body, { Vote })
+      .then(updatedPostData => res.json(updatedPostData))
+      .catch(err => {
+        console.log(err);
+        res.status(400).json(err);
+      });
+  });
 
 // PUT api/posts/1-- update a post's title
 router.put('/:id', (req, res) => {
