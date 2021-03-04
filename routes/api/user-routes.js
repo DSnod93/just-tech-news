@@ -1,13 +1,7 @@
 const router = require('express').Router();
 const { User } = require('../../models');
 
-// create our User model
-class User extends Model {
-    // set up method to run on instance data (per user) to check password
-    checkPassword(loginPw) {
-        return bcrypt.compareSync(loginPw, this.password);
-    }
-}
+
 
 // GET /api/users
 router.get('/', (req, res) => {
@@ -58,26 +52,30 @@ router.post('/', (req, res) => {
         });
 });
 
+// POST /api/users/login -- login route for a user
 router.post('/login', (req, res) => {
+    // findOne method by email to look for an existing user in the database with the email address entered
     // expects {email: 'lernantino@gmail.com', password: 'password1234'}
     User.findOne({
         where: {
             email: req.body.email
         }
     }).then(dbUserData => {
+        // if the email is not found, return an error
         if (!dbUserData) {
             res.status(400).json({ message: 'No user with that email address!' });
             return;
         }
-
+        // Otherwise, verify the user.
+        // call the instance method as defined in the User model
         const validPassword = dbUserData.checkPassword(req.body.password);
-
+        // if the password is invalid (method returns false), return an error
         if (!validPassword) {
             res.status(400).json({ message: 'Incorrect password!' });
             return;
         }
-
-        res.json({ user: dbUserData, message: 'You are now logged in!' });
+        // otherwise return the user object and a success message
+        res.json({ user: dbUserData, message: 'You are now logged in!' })
     });
 });
 
