@@ -10,23 +10,35 @@
 
 <body>
   <div class="wrapper">
+    <!--header section with link to log in-->
     <header>
       <h1>
         <a href="/">Just Tech News</a>
       </h1>
       <nav>
+        <!--Show login and logout as appropriate based on whether there is an active session or not-->
+        {{#if loggedIn}}
         <button id="logout" class="btn-no-style">logout</button>
+        {{else}}
         <a href="/login">login</a>
+        {{/if}}
       </nav>
     </header>
+    <!--main section where posts will be populated by handlebars and the database-->
     <main>
       {{{ body }}}
     </main>
+    <!--footer section-->
     <footer>
       Thanks for visiting!
     </footer>
   </div>
-   <script src="/javascript/logout.js"></script>
+
+  <!--Logout Script-->
+  <!--load the logout script only if there is an active session-->
+  {{#if loggedIn}}
+  <script src="/javascript/logout.js"></script>
+  {{/if}}
 
 </body>
 
