@@ -28,19 +28,8 @@
 {{/if}}
 
 <!--Display all the comments on the post-->
-<div class="comments">
-  {{#each post.comments}}
-  <section class="comment">
-    <div class="meta">
-      {{user.username}} on {{created_at}}
-    </div>
-    <div class="text">
-      {{comment_text}}
-    </div>
-  </section>
-  {{/each}}
-</div>
-
+{{> comments post.comments}}
+  
 <!--Scripts for adding a comment and adding an upvote-->
 <!--Only loaded for a logged in user-->
 {{#if loggedIn}}

@@ -3,21 +3,7 @@
   <!--uses handlebars each to iterate through the array of posts; defines post as a variable to make dynamic content below more semantic-->
   {{#each posts as |post|}}
   <li>
-    <article class="post">
-      <div class="title">
-        <!--from each post object, get the url and title of the article-->
-        <a href="{{post.post_url}}" target="_blank">{{post.title}}</a>
-        <span>({{post.post_url}})</span>
-      </div>
-      <div class="meta">
-        <!--also get the vote count, the author's username, and the time the post was created-->
-        {{post.vote_count}} point(s) by {{post.user.username}} on
-        {{post.created_at}}
-        |
-        <!--lastly, get the number of comments and link to a single page with the post and comment details-->
-        <a href="/post/{{post.id}}">{{post.comments.length}} comment(s)</a>
-      </div>
-    </article>
+    {{> post-info post }}
   </li>
   {{/each}}
 </ol>
