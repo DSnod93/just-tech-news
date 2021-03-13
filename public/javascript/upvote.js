@@ -1,13 +1,13 @@
-// A function to handle the upvote button
+// A FUNCTION TO HANDLE THE UPVOTE BUTTON
 async function upvoteClickHandler(event) {
     event.preventDefault();
 
-    // get the post id from the url
+    // GET THE POST ID FROM THE URL
     const id = window.location.toString().split('/')[
         window.location.toString().split('/').length - 1
     ];
-    // add a vote to the post with an async function
-    // if the vote is successful, reload the page, showing the new vote, otherwise display the error
+    // ADD A VOTE TO THE POST WITH AN ASYNC FUNCTION
+    // IF THE VOTE IS SUCCESSFUL, RELOAD THE PAGE, SHOWING THE NEW VOTE, OTHERWISE DISPLAY THE ERROR
     const response = await fetch('/api/posts/upvote', {
         method: 'PUT',
         body: JSON.stringify({

@@ -1,31 +1,29 @@
-// Server for the Just Tech News project
-// Dependencies
-// path module
+// SERVER FOR THE JUST TECH NEWS PROJECT
+// DEPENDENCIES
+// PATH MODULE
 const path = require('path');
-// dotenv file for sensitive configuration information
+// DOTENV FILE FOR SENSITIVE CONFIGURATION INFORMATION
 require('dotenv').config();
-// Express.js server
+// EXPRESS.JS SERVER
 const express = require('express');
-// All routes as defined in the controllers folder
+// ALL ROUTES AS DEFINED IN THE CONTROLLERS FOLDER
 const routes = require('./controllers/');
-// Sequelize connection to the database
+// SEQUELIZE CONNECTION TO THE DATABASE
 const sequelize = require('./config/connection');
-// Handlebars template engine for front-end
+// HANDLEBARS TEMPLATE ENGINE FOR FRONT-END
 const exphbs = require('express-handlebars');
-// Express session to handle session cookies
+// EXPRESS SESSION TO HANDLE SESSION COOKIES
 const session = require('express-session')
-// Sequelize store to save the session so the user can remain logged in
+// SEQUELIZE STORE TO SAVE THE SESSION SO THE USER CAN REMAIN LOGGED IN
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
-// Handlebars helpers
+// HANDLEBARS HELPERS
 const helpers = require('./utils/helpers');
 
-// Initialize handlebars for the html templates
+// INITIALIZE HANDLEBARS FOR THE HTML TEMPLATES
 const hbs = exphbs.create({});
-// Initialize handlebars for the html templates, using the custom helpers
-const hbs = exphbs.create({ helpers });
 
-// Initialize session with options per best practices.  
-//The secret is defined in the .env file so it is kept secure, along with the mysql login information used in config/connection
+// INITIALIZE SESSION WITH OPTIONS PER BEST PRACTICES.  
+//THE SECRET IS DEFINED IN THE .ENV FILE SO IT IS KEPT SECURE, ALONG WITH THE MYSQL LOGIN INFORMATION USED IN CONFIG/CONNECTION
 const sess = {
   secret: 'Super secret secret',
   cookie: {},
@@ -35,25 +33,25 @@ const sess = {
     db: sequelize
   })
 };
-// Initialize the server
+// INITIALIZE THE SERVER
 const app = express();
-// Define the port for the server
+// DEFINE THE PORT FOR THE SERVER
 const PORT = process.env.PORT || 3001;
-// Give the server a path to the public directory for static files
+// GIVE THE SERVER A PATH TO THE PUBLIC DIRECTORY FOR STATIC FILES
 app.use(express.static(path.join(__dirname, 'public')));
-// Set handlebars as the template engine for the server
+// SET HANDLEBARS AS THE TEMPLATE ENGINE FOR THE SERVER
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
-// Have Express parse JSON and string data
+// HAVE EXPRESS PARSE JSON AND STRING DATA
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// Tell the app to use Express Session for the session handling
+// TELL THE APP TO USE EXPRESS SESSION FOR THE SESSION HANDLING
 app.use(session(sess));
-// Give the server the path to the routes
+// GIVE THE SERVER THE PATH TO THE ROUTES
 app.use(routes);
-// Turn on connection to db and then to the server
-// force: true to reset the database and clear all values, updating any new relationships
-// force: false to maintain data - aka normal operation
+// TURN ON CONNECTION TO DB AND THEN TO THE SERVER
+// FORCE: TRUE TO RESET THE DATABASE AND CLEAR ALL VALUES, UPDATING ANY NEW RELATIONSHIPS
+// FORCE: FALSE TO MAINTAIN DATA - AKA NORMAL OPERATION
 sequelize.sync({ force: false }).then(() => {
   app.listen(PORT, () => console.log('Now listening'));
 });

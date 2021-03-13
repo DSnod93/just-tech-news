@@ -1,16 +1,20 @@
-// Dependencies
-// Express.js connection
+// DEPENDENCIES
+// EXPRESS.JS CONNECTION
 const router = require('express').Router();
-// User model and Post model
+// USER MODEL AND POST MODEL
 const { User, Post, Vote, Comment } = require('../../models');
-// Sequelize database connection
+// SEQUELIZE DATABASE CONNECTION
 const sequelize = require('../../config/connection');
-// Routes
-// GET api/posts/ -- get all posts
+// THE AUTHORIZATION MIDDLEWARE TO REDIRECT UNAUTHENTICATED USERS TO THE LOGIN PAGE
+const withAuth = require('../../utils/auth');
+
+// ROUTES
+
+// GET API/POSTS/ -- GET ALL POSTS
 router.get('/', (req, res) => {
     Post.findAll({
-        // Query configuration
-        // From the Post table, include the post ID, URL, title, and the timestamp from post creation, as well as total votes
+        // QUERY CONFIGURATION
+        // FROM THE POST TABLE, INCLUDE THE POST ID, URL, TITLE, AND THE TIMESTAMP FROM POST CREATION, AS WELL AS TOTAL VOTES
         attributes: [
             'id',
             'post_url',
@@ -18,10 +22,10 @@ router.get('/', (req, res) => {
             'created_at',
             [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
         ],
-        // Order the posts from most recent to least
+        // ORDER THE POSTS FROM MOST RECENT TO LEAST
         order: [['created_at', 'DESC']],
-        // From the User table, include the post creator's user name
-        // From the Comment table, include all comments
+        // FROM THE USER TABLE, INCLUDE THE POST CREATOR'S USER NAME
+        // FROM THE COMMENT TABLE, INCLUDE ALL COMMENTS
         include: [
             {
                 model: User,
@@ -37,22 +41,23 @@ router.get('/', (req, res) => {
             }
         ]
     })
-        // return the posts
+        // RETURN THE POSTS
         .then(dbPostData => res.json(dbPostData))
-        // if there was a server error, return the error
+        // IF THERE WAS A SERVER ERROR, RETURN THE ERROR
         .catch(err => {
             console.log(err);
             res.status(500).json(err);
         });
 });
-// GET api/posts/:id -- get a single post by id
+
+// GET API/POSTS/:ID -- GET A SINGLE POST BY ID
 router.get('/:id', (req, res) => {
     Post.findOne({
         where: {
-            // specify the post id parameter in the query
+            // SPECIFY THE POST ID PARAMETER IN THE QUERY
             id: req.params.id
         },
-        // Query configuration, as with the get all posts route
+        // QUERY CONFIGURATION, AS WITH THE GET ALL POSTS ROUTE
         attributes: [
             'id',
             'post_url',
@@ -76,7 +81,7 @@ router.get('/:id', (req, res) => {
         ]
     })
         .then(dbPostData => {
-            // if no post by that id exists, return an error
+            // IF NO POST BY THAT ID EXISTS, RETURN AN ERROR
             if (!dbPostData) {
                 res.status(404).json({ message: 'No post found with this id' });
                 return;
@@ -84,18 +89,19 @@ router.get('/:id', (req, res) => {
             res.json(dbPostData);
         })
         .catch(err => {
-            // if a server error occured, return an error
+            // IF A SERVER ERROR OCCURED, RETURN AN ERROR
             console.log(err);
             res.status(500).json(err);
         });
 });
-// POST api/posts -- create a new post
-router.post('/', (req, res) => {
-    // expects object of the form {title: 'Sample Title Here', post_url: 'http://somestring.someotherstring', user_id: 1}
+
+// POST API/POSTS -- CREATE A NEW POST
+router.post('/', withAuth, (req, res) => {
+    // EXPECTS OBJECT OF THE FORM {TITLE: 'SAMPLE TITLE HERE', POST_URL: 'HTTP://SOMESTRING.SOMEOTHERSTRING', USER_ID: 1}
     Post.create({
         title: req.body.title,
         post_url: req.body.post_url,
-        user_id: req.body.user_id
+        user_id: req.session.user_id
     })
         .then(dbPostData => res.json(dbPostData))
         .catch(err => {
@@ -104,28 +110,28 @@ router.post('/', (req, res) => {
         });
 });
 
-// PUT api/posts/upvote -- upvote a post (this route must be above the update route, otherwise express.js will treat upvote as an id)
-router.put('/upvote', (req, res) => {
-    // make sure that a session exists, i.e. that a user is logged in
+// PUT API/POSTS/UPVOTE -- UPVOTE A POST (THIS ROUTE MUST BE ABOVE THE UPDATE ROUTE, OTHERWISE EXPRESS.JS WILL TREAT UPVOTE AS AN ID)
+router.put('/upvote', withAuth, (req, res) => {
+    // MAKE SURE THAT A SESSION EXISTS, I.E. THAT A USER IS LOGGED IN
     if (req.session) {
-        // pass the session user id along with the req.body properties (destructured) to the model method created in Post.js for upvotes
+        // PASS THE SESSION USER ID ALONG WITH THE REQ.BODY PROPERTIES (DESTRUCTURED) TO THE MODEL METHOD CREATED IN POST.JS FOR UPVOTES
         Post.upvote({ ...req.body, user_id: req.session.user_id }, { Vote, Comment, User })
-            // return the data (lines changed)
+            // RETURN THE DATA (LINES CHANGED)
             .then(updatedVoteData => res.json(updatedVoteData))
-            // or an error if one occurs
+            // OR AN ERROR IF ONE OCCURS
             .catch(err => {
                 console.log(err);
                 res.status(500).json(err);
             });
     }
-    // if a user is not logged in, send a bad request error
+    // IF A USER IS NOT LOGGED IN, SEND A BAD REQUEST ERROR
     else {
         res.status(400)
     }
 });
 
-// PUT api/posts/1-- update a post's title
-router.put('/:id', (req, res) => {
+// PUT API/POSTS/1-- UPDATE A POST'S TITLE
+router.put('/:id', withAuth, (req, res) => {
     Post.update(
         {
             title: req.body.title
@@ -148,8 +154,9 @@ router.put('/:id', (req, res) => {
             res.status(500).json(err)
         });
 });
-// DELETE api/posts/1 -- delete a post
-router.delete('/:id', (req, res) => {
+
+// DELETE API/POSTS/1 -- DELETE A POST
+router.delete('/:id', withAuth, (req, res) => {
     Post.destroy({
         where: {
             id: req.params.id
@@ -167,4 +174,5 @@ router.delete('/:id', (req, res) => {
             res.status(500).json(err);
         });
 });
+
 module.exports = router;

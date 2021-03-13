@@ -18,6 +18,7 @@
       <nav>
         <!--Show login and logout as appropriate based on whether there is an active session or not-->
         {{#if loggedIn}}
+         <a href="/dashboard">dashboard</a>
         <button id="logout" class="btn-no-style">logout</button>
         {{else}}
         <a href="/login">login</a>

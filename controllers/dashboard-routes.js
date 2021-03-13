@@ -1,16 +1,20 @@
-// USER FACING ROUTES FROM HANDLEBARS
-//DEPENDENCIES
-// ROUTER
+// DEPENDENCIES
+// THE ROUTER AND THE DATABASE
 const router = require('express').Router();
-// SEQUELIZE AND THE POST, USER, AND COMMENT MODELS
 const sequelize = require('../config/connection');
-const { Post, User, Comment } = require('../models')
-// ROUTE TO GET THE HOMEPAGE AND RENDER ALL THE POSTS
-router.get('/', (req, res) => {
-  // CONSOLE LOG THE SESSION INFORMATION
-  console.log(req.session)
-  // GET THE POSTS FROM THE DATABASE
+// THE MODELS
+const { Post, User, Comment } = require('../models');
+// the authorization middleware to redirect unauthenticated users to the login page
+const withAuth = require('../utils/auth')
+
+// A ROUTE TO RENDER THE DASHBOARD PAGE, ONLY FOR A LOGGED IN USER
+router.get('/', withAuth, (req, res) => {
+  // ALL OF THE USERS POSTS ARE OBTAINED FROM THE DATABASE
   Post.findAll({
+    where: {
+      // USE THE ID FROM THE SESSION
+      user_id: req.session.user_id
+    },
     attributes: [
       'id',
       'post_url',
@@ -34,13 +38,9 @@ router.get('/', (req, res) => {
     ]
   })
     .then(dbPostData => {
-      // CREATE AN ARRAY FOR THE POSTS, USING THE GET METHOD TO TRIM EXTRA SEQUELIZE OBJECT DATA OUT
+      // SERIALIZE DATA BEFORE PASSING TO TEMPLATE
       const posts = dbPostData.map(post => post.get({ plain: true }));
-      // PASS THE POSTS INTO THE HOMEPAGE TEMPLATE
-      res.render('homepage', {
-        posts,
-        loggedIn: req.session.loggedIn
-      });
+      res.render('dashboard', { posts, loggedIn: true });
     })
     .catch(err => {
       console.log(err);
@@ -48,8 +48,9 @@ router.get('/', (req, res) => {
     });
 });
 
-// ROUTE TO RENDER A SINGLE POST PAGE USING SEQUELIZE FINDONE ROUTE
-router.get('/post/:id', (req, res) => {
+// A ROUTE TO EDIT A POST
+router.get('/edit/:id', withAuth, (req, res) => {
+  // ALL OF THE USERS POSTS ARE OBTAINED FROM THE DATABASE
   Post.findOne({
     where: {
       id: req.params.id
@@ -77,19 +78,14 @@ router.get('/post/:id', (req, res) => {
     ]
   })
     .then(dbPostData => {
+      // IF NO POST BY THAT ID EXISTS, RETURN AN ERROR
       if (!dbPostData) {
         res.status(404).json({ message: 'No post found with this id' });
         return;
       }
-
-      // SERIALIZE THE DATA
+      // SERIALIZE DATA BEFORE PASSING TO TEMPLATE
       const post = dbPostData.get({ plain: true });
-
-      // PASS DATA TO TEMPLATE FOR THE POST AND FOR IF THERE IS AN ACTIVE SESSION, I.E. A LOGGED IN USER
-      res.render('single-post', {
-        post,
-        loggedIn: req.session.loggedIn
-      });
+      res.render('edit-post', { post, loggedIn: true });
     })
     .catch(err => {
       console.log(err);
@@ -97,15 +93,4 @@ router.get('/post/:id', (req, res) => {
     });
 });
 
-// ROUTE TO RENDER THE LOGIN PAGE
-router.get('/login', (req, res) => {
-  // IF A SESSION IS ALREADY DETECTED, REROUTE TO THE HOMEPAGE
-  if (req.session.loggedIn) {
-    res.redirect('/');
-    return;
-  }
-  // OTHERWISE, RENDER THE LOGIN PAGE
-  res.render('login');
-});
-// EXPORT THE ROUTER
 module.exports = router;

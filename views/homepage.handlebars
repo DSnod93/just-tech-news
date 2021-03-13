@@ -1,6 +1,8 @@
-<!--An ordered list for the articles posted-->
+<!--AN ORDERED LIST FOR THE ARTICLES POSTED-->
 <ol class="post-list">
-  <!--uses handlebars each to iterate through the array of posts; defines post as a variable to make dynamic content below more semantic-->
+  <!--USES HANDLEBARS EACH TO ITERATE THROUGH THE ARRAY OF POSTS; 
+    DEFINES POST AS A VARIABLE TO MAKE DYNAMIC CONTENT BELOW MORE SEMANTIC;
+    USES POST-INFO PARTIAL TO DEFINE CONTENT-->
   {{#each posts as |post|}}
   <li>
     {{> post-info post }}

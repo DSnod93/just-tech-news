@@ -1,98 +1,77 @@
-//USER MODEL
+// AN INDEX FILE TO GATHER THE MODELS AND EXPORT THEM FOR USE
+
+// USER MODEL
 const User = require('./User');
-//POST MODEL
-const Post = require("./Post");
-// Vote model
+// POST MODEL
+const Post = require('./Post');
+// VOTE MODEL
 const Vote = require('./Vote');
-// Comment model
+// COMMENT MODEL
 const Comment = require('./Comment');
 
-
-
-// Create associations between the models
-// User-Post relationship
+// CREATE ASSOCIATIONS BETWEEN THE MODELS
+// USER-POST RELATIONSHIP
 User.hasMany(Post, {
     foreignKey: 'user_id'
 });
-//Post-User relationship
+//POST-USER RELATIONSHIP
 Post.belongsTo(User, {
     foreignKey: 'user_id'
 });
 
-// User-Vote-Post through relationship
+// USER-VOTE-POST THROUGH RELATIONSHIP
 User.belongsToMany(Post, {
     through: Vote,
     as: 'voted_posts',
     foreignKey: 'user_id'
 });
 
-// Post-Vote-User through relationship
+// POST-VOTE-USER THROUGH RELATIONSHIP
 Post.belongsToMany(User, {
     through: Vote,
     as: 'voted_posts',
     foreignKey: 'post_id'
 });
 
-// Vote-User relationship
+// VOTE-USER RELATIONSHIP
 Vote.belongsTo(User, {
     foreignKey: 'user_id'
 });
 
-// Vote-Post relationship
+// VOTE-POST RELATIONSHIP
 Vote.belongsTo(Post, {
     foreignKey: 'post_id'
 });
 
-// User-Vote relationship
+// USER-VOTE RELATIONSHIP
 User.hasMany(Vote, {
     foreignKey: 'user_id'
 });
 
-// Post-Vote relationship
+// POST-VOTE RELATIONSHIP
 Post.hasMany(Vote, {
     foreignKey: 'post_id'
 });
 
-
-// Comment-User relationship
+// COMMENT-USER RELATIONSHIP
 Comment.belongsTo(User, {
     foreignKey: 'user_id'
 });
 
-// Comment-Post relationship
+// COMMENT-POST RELATIONSHIP
 Comment.belongsTo(Post, {
     foreignKey: 'post_id'
 });
 
-// User-Comment relationsihp
+// USER-COMMENT RELATIONSIHP
 User.hasMany(Comment, {
     foreignKey: 'user_id'
 });
 
-// Post-Comment relationship
+// POST-COMMENT RELATIONSHIP
 Post.hasMany(Comment, {
     foreignKey: 'post_id'
 })
 
-// Comment-User relationship
-Comment.belongsTo(User, {
-    foreignKey: 'user_id'
-});
-
-// Comment-Post relationship
-Comment.belongsTo(Post, {
-    foreignKey: 'post_id'
-});
-
-// User-Comment relationsihp
-User.hasMany(Comment, {
-    foreignKey: 'user_id'
-});
-
-// Post-Comment relationship
-Post.hasMany(Comment, {
-    foreignKey: 'post_id'
-})
-
-
+// EXPORT THE MODULES
 module.exports = { User, Post, Vote, Comment };

@@ -1,8 +1,13 @@
+// POST MODEL
+// DEPENDENCIES
+// SEQUELIZE MODEL, DATATYPES, AND DATABASE CONNECTION
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/connection');
 
-// create our Post model
+// THE POST MODEL EXTENDS THE SEQUELIZE MODEL 
 class Post extends Model {
+    // MODEL METHOD FOR THE UPVOTE FUNCTION
+    // THIS CODE WAS PREVIOUSLY IN THE API/POSTS/UPVOTE ROUTE
     static upvote(body, models) {
         return models.Vote.create({
             user_id: body.user_id,
@@ -27,7 +32,7 @@ class Post extends Model {
     }
 }
 
-// create fields/columns for Post model
+// DEFINE THE TABLE COLUMNS AND CONFIGURATION, SIMILAR TO THE SETUP FOR THE USER MODEL
 Post.init(
     {
         id: {
@@ -61,6 +66,7 @@ Post.init(
         underscored: true,
         modelName: 'post'
     }
-);
+)
 
+// EXPORT THE MODEL
 module.exports = Post;

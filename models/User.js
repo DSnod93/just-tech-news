@@ -1,75 +1,99 @@
+// USER MODEL
+// DEPENDENCIES
+// USE MODEL AND DATATYPE FROM SEQUELIZE
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/connection');
+// USE BCRYPT FOR PASSWORD HASHING
 const bcrypt = require('bcrypt');
-const { use } = require('../controllers');
 
-// create our User model
+// CREATE THE USER MODEL
 class User extends Model {
-    // set up method to run on instance data (per user) to check password
+    // SET UP A METHOD TO RUN ON A USER INSTANCE TO CHECK THE PASSWORD AS PROVIDED 
+    // IN THE LOGIN ROUTE AGAINST THE HASHED DATABASE PASSWORD
     checkPassword(loginPw) {
         return bcrypt.compareSync(loginPw, this.password);
     }
 }
 
+// DEFINE THE TABLE COLUMNS AND CONFIGURATION
 User.init(
     {
-        // define an id column
+        // TABLE COLUMN DEFINITIONS
+        // DEFINE AN ID COLUMN
         id: {
-            // use the special Sequelize DataTypes object provide what type of data it is
+            // USE THE SPECIAL SEQUELIZE DATATYPES OBJECT TO DEFINE WHAT TYPE OF DATA IT IS
             type: DataTypes.INTEGER,
-            // this is the equivalent of SQL's `NOT NULL` option
+            // THIS IS THE SEQUELIZE EQUIVALENT OF SQL'S `NOT NULL` OPTION
             allowNull: false,
-            // instruct that this is the Primary Key
+            // DEFINE THIS COMUMN AS THE THE PRIMARY KEY
             primaryKey: true,
-            // turn on auto increment
+            // TURN ON AUTO INCREMENT
             autoIncrement: true
         },
-        // define a username column
+        // DEFINE A USERNAME COLUMN
         username: {
+            // DEFINE THE DATA TYPE
             type: DataTypes.STRING,
-            allowNull: false
-        },
-        // define an email column
-        email: {
-            type: DataTypes.STRING,
+            // REQUIRE THE DATA TO BE ENTERED
             allowNull: false,
-            // there cannot be any duplicate email values in this table
-            unique: true,
-            // if allowNull is set to false, we can run our data through validators before creating the table data
             validate: {
+                notEmpty: true,
+            }
+        },
+        // DEFINE AN EMAIL COLUMN
+        email: {
+            // DEFINE THE DATA TYPE
+            type: DataTypes.STRING,
+            // REQUIRE THE DATA TO BE ENTERED
+            allowNull: false,
+            // DO NOT ALLOW DUPLICATE EMAIL VALUES IN THIS TABLE
+            unique: true,
+            // IF ALLOWNULL IS SET TO FALSE, THE DATA CAN BE VALIDATED BEFORE CREATING THE TABLE DATA
+            validate: {
+                // THIS WILL CHECK THE FORMAT OF THE ENTRY AS A VALID EMAIL BY PATTERN CHECKING <STRING>@<STRING>.<STRING>
                 isEmail: true
             }
         },
-        // define a password column
+        // DEFINE A PASSWORD COLUMN
         password: {
+            // DEFINE THE DATA TYPE
             type: DataTypes.STRING,
+            // REQUIRE THE DATA TO BE ENTERED
             allowNull: false,
             validate: {
-                // this means the password must be at least four characters long
+                // THIS MEANS THE PASSWORD MUST BE AT LEAST FOUR CHARACTERS LONG
                 len: [4]
             }
         }
     },
     {
+        // TABLE CONFIGURATION OPTIONS (https://sequelize.org/v5/manual/models-definition.html#configuration))
+        // ADD HOOKS FOR THE PASSWORD HASHING OPERATION
         hooks: {
-            // set up beforeCreate lifecycle "hook" functionality
+            // SET UP A BEFORECREATE LIFECYCLE HOOK TO HASH THE PASSWORD BEFORE THE OBJECT IS CREATED IN THE DATABASE
+            // AND RETURN THE NEW USERDATA OBJECT
             async beforeCreate(newUserData) {
                 newUserData.password = await bcrypt.hash(newUserData.password, 10);
                 return newUserData;
             },
-            // set up beforeUpdate lifecycle "hook" functionality
-            async beforeUpdate(updateUserData) {
+            // SET UP A BEFOREUPDATE LIFECYCLE HOOK TO HASH THE PASSWORD BEFORE A USER OBJECT IS UPDATED IN THE DATABASE
+            async beforeUpdate(updatedUserData) {
                 updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
                 return updatedUserData;
             }
         },
-
+        // PASS IN THE IMPORTED SEQUELIZE CONNECTION TO THE DATABASE
         sequelize,
+        // DO NOT AUTOMATICALLY CREATE CREATEDAT/UPDATEDAT TIMESTAMP FIELDS
         timestamps: false,
+        // DO NOT PLURALIZE NAME OF DATABASE TABLE
         freezeTableName: true,
+        // USE UNDERSCORES INSTEAD OF CAMEL-CASING (I.E. `COMMENT_TEXT` AND NOT `COMMENTTEXT`)
         underscored: true,
+        // MAKE IT SO THE MODEL NAME STAYS LOWERCASE IN THE DATABASE
         modelName: 'user'
     }
 );
 
+// EXPORT USER 
 module.exports = User;

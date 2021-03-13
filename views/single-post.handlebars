@@ -1,25 +1,14 @@
-<!--get the information for the individual requested post-->
-<article class="post">
-  <div class="title">
-    <a href="{{post.post_url}}" target="_blank">{{post.title}}</a>
-    <span>({{post.post_url}})</span>
-  </div>
-  <div class="meta">
-    {{post.vote_count}} point(s) by {{post.user.username}} on
-    {{post.created_at}}
-    |
-    <a href="/post/{{post.id}}">{{post.comments.length}} comment(s)</a>
-  </div>
-</article>
+<!--GET THE INFORMATION FOR THE INDIVIDUAL REQUESTED POST USING THE POST-INFO PARTIAL-->
+{{> post-info post }}
 
-<!--Comment Form-->
-<!--Comment Form and Upvote Button-->
-<!--Displayed only for logged in users-->
+<!--COMMENT FORM AND UPVOTE BUTTON-->
+<!--DISPLAYED ONLY FOR LOGGED IN USERS-->
 {{#if loggedIn}}
 <form class="comment-form">
   <div>
     <textarea name="comment-body"></textarea>
   </div>
+
   <div>
     <button type="submit">add comment</button>
     <button type="button" class="upvote-btn">upvote</button>
@@ -27,12 +16,12 @@
 </form>
 {{/if}}
 
-<!--Display all the comments on the post-->
+<!--DISPLAY ALL THE COMMENTS ON THE POST USING THE COMMENTS PARTIAL VIEW-->
 {{> comments post.comments}}
-  
-<!--Scripts for adding a comment and adding an upvote-->
-<!--Only loaded for a logged in user-->
+
+<!--SCRIPTS FOR ADDING A COMMENT AND ADDING AN UPVOTE-->
+<!--ONLY LOADED FOR A LOGGED IN USER-->
 {{#if loggedIn}}
 <script src="/javascript/comment.js"></script>
 <script src="/javascript/upvote.js"></script>
-{{/if}} 
+{{/if}}

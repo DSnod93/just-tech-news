@@ -1,22 +1,21 @@
-// Vote Model
-
-// Dependencies
-// use Model and Datatype from sequelize
+// VOTE MODEL
+// DEPENDENCIES
+// USE MODEL AND DATATYPE FROM SEQUELIZE
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/connection');
 
-// create the Vote model
+// CREATE THE VOTE MODEL
 class Vote extends Model { }
 
 Vote.init(
     {
-        // vote id - the primary key
+        // VOTE ID - THE PRIMARY KEY
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        // reference to the user id of the voter
+        // REFERENCE TO THE USER ID OF THE VOTER
         user_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -25,7 +24,7 @@ Vote.init(
                 key: 'id'
             }
         },
-        // reference to the post id of the post receiving the vote
+        // REFERENCE TO THE POST ID OF THE POST RECEIVING THE VOTE
         post_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
